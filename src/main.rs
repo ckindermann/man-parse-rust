@@ -5,27 +5,46 @@ use serde_json::json;
 extern crate tree_sitter_manchester;
 use tree_sitter_manchester::language;
 
-//translation of a syntax node
+//tree transducer for manchester syntax parse tree
+//I distinguish between three cases:
+//(i) nodes with a single child
+//(ii) nodes with more than one child
+//(iii) nodes with no child
+//
+//The reasons for this is as follows: 
+//(i):   most nodes with only one child are to be removed from the parse tree. 
+//       So, the default behavior of the tree transducer for such nodes is
+//       to contract edges stemming from such nodes.
+//
+//(ii):  here we need an exhaustive enumeration of all cases
+//
+//(iii): translation of terminal symbols (which are not necessarily stored by tree-sitter itself)
 pub fn translate(n : &Node, raw : &str) -> Value {
+
     let child_count = n.named_child_count(); 
 
     if child_count == 1 { //transduce single child nodes
          return match n.kind() {
              "primaryNegation" => translate_operator(&n.named_child(0).unwrap(), raw, "ComplementOf"),
-             _ => translate(&n.named_child(0).unwrap(), raw),//just unpack
+             "objectPropertySelf" => translate_operator(&n, raw, "HasSelf"), 
+             _ => translate(&n.named_child(0).unwrap(), raw),//default for (i)
          }
-    } else { //transduce -
+    } else { //transduce 
          return match n.kind() {
              "description" => translate_operator(&n, raw, "UnionOf"), 
              "conjunction" => translate_operator(&n, raw, "IntersectionOf"), 
              "objectPropertyExistential" => translate_operator(&n, raw, "SomeValuesFrom"), 
              "objectPropertyUniversal" => translate_operator(&n, raw, "AllValuesFrom"), 
-             "objectPropertySelf" => translate_operator(&n, raw, "HasSelf"), 
              "objectPropertyValue" => translate_operator(&n, raw, "HasValue"), 
-             _ => translate_raw(&n, raw),
+             "qualifiedObjectMinCardinality" => translate_operator(&n, raw, "QualifiedMinCardinality"), 
+             "unqualifiedObjectMinCardinality" => translate_operator(&n, raw, "MinCardinality"), 
+             "qualifiedObjectMaxCardinality" => translate_operator(&n, raw, "QualifiedMaxCardinality"), 
+             "unqualifiedObjectMaxCardinality" => translate_operator(&n, raw, "MaxCardinality"), 
+             "qualifiedObjectExactCardinality" => translate_operator(&n, raw, "QualifiedExactCardinality"), 
+             "unqualifiedObjectExactCardinality" => translate_operator(&n, raw, "ExactCardinality"), 
+             _ => translate_raw(&n, raw), //translation of terminal symbols, i.e. case (iii)
          }; 
-    } 
-    //let res : [Value; child_count] = [json!("an"), json!("array")];
+    }
 }
 
 pub fn translate_raw(n : &Node, raw : &str) -> Value { 
@@ -46,45 +65,22 @@ pub fn translate_operator(n : &Node, raw : &str, operator : &str) -> Value {
     json!(res)
 }
 
-pub fn translate_description(n : &Node, raw : &str) -> Value { 
-    let child_count = n.named_child_count();
-    let mut res = Vec::new();
-    res.push(json!("UnionOf"));
-
-    for i in 0..child_count {
-        res.push(translate(&n.named_child(i).unwrap(), raw));
-    }
-    json!(res)
-}
-
 fn main() {
     //let code = "((b or c) and d) and e"; 
     //let code = "a or bbaba and ddd"; 
     //let code = "not((not a) and b)";
-    let code = "a some p or b only d";
+    //let code = "a some p or b only d";
+    //let code = "a exactly 2 asd";
+    //let code = "a exactly 2 asd or b some d:asdA";
+    let code = "(aa some (b or c)) and (p some d)";
+    //let code = "(bo1 some (obo2 or obo3)) and (obo4 some obo5)";
+    //let code = "obo:OBI_0000293 some (obo:IAO_0000010 or obo:IAO_0000096)";
 
     let mut parser = Parser::new();
 
     let language : Language = language();
     parser.set_language(language).expect("Error loading manchester grammar");
     let tree = parser.parse(code, None).unwrap();
-
-
-    let mut tc = tree.walk();
-    println!("{:#?}", tc.node());
-    println!("{:#?}", tc.goto_first_child());
-    println!("{:#?}", tc.node());
-    println!("{:#?}", tc.goto_first_child());
-    println!("{:#?}", tc.node());
-
-    let start = tc.node().start_position().column;
-    let end = tc.node().end_position().column;
-    let extract = &code[start..end];
-    println!("{:#?}", extract);
-
-    let n = tc.node();
-    println!("---");
-
 
     println!("Tree: {:#?}", tree);
     println!("");
@@ -99,6 +95,34 @@ fn main() {
 
     //let mut rc = tree.root_node().child(0).unwrap().walk();
     //for x in tree.root_node().children(&mut rc){ 
-    //    println!("AA{:#?}", x.kind());
+    //    println!("Kind {:#?}", x.kind());
     //} 
+
+    //Example for walking a tree
+    //let mut tc = tree.walk();
+    //println!("{:#?}", tc.node());
+    //println!("{:#?}", tc.goto_first_child());
+    //println!("{:#?}", tc.node());
+    //println!("{:#?}", tc.goto_first_child());
+    //println!("{:#?}", tc.node());
+
+    //let start = tc.node().start_position().column;
+    //let end = tc.node().end_position().column;
+    //let extract = &code[start..end];
+    //println!("{:#?}", extract);
+
+    //let n = tc.node();
+    //println!("---");
 }
+
+//pub fn translate_description(n : &Node, raw : &str) -> Value { 
+//    let child_count = n.named_child_count();
+//    let mut res = Vec::new();
+//    res.push(json!("UnionOf"));
+//
+//    for i in 0..child_count {
+//        res.push(translate(&n.named_child(i).unwrap(), raw));
+//    }
+//    json!(res)
+//}
+
