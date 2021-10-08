@@ -26,11 +26,16 @@ pub fn translate(n : &Node, raw : &str) -> Value {
     if child_count == 1 { //transduce single child nodes
          return match n.kind() {
              "primaryNegation" => translate_operator(&n.named_child(0).unwrap(), raw, "ComplementOf"),
+             "restrictionNegation" => translate_operator(&n.named_child(0).unwrap(), raw, "ComplementOf"),
              "objectPropertySelf" => translate_operator(&n, raw, "HasSelf"), 
              _ => translate(&n.named_child(0).unwrap(), raw),//default for (i)
          }
     } else { //transduce 
          return match n.kind() {
+             "subClassOf" => translate_operator(&n, raw, "SubClassOf"), 
+             "equivalentTo" => translate_operator(&n, raw, "EquivalentClasses"), 
+             "disjointWith" => translate_operator(&n, raw, "DisjointClasses"), 
+             "disjointUnionOf" => translate_operator(&n, raw, "DisjointUnionOf"), 
              "description" => translate_operator(&n, raw, "UnionOf"), 
              "conjunction" => translate_operator(&n, raw, "IntersectionOf"), 
              "objectPropertyExistential" => translate_operator(&n, raw, "SomeValuesFrom"), 
@@ -71,10 +76,17 @@ fn main() {
     //let code = "not((not a) and b)";
     //let code = "a some p or b only d";
     //let code = "a exactly 2 asd";
+    //let code = "a some asd";
     //let code = "a exactly 2 asd or b some d:asdA";
-    let code = "(aa some (b or c)) and (p some d)";
+    //let code = "(aa some (b or c)) and (p some d)";
     //let code = "(bo1 some (obo2 or obo3)) and (obo4 some obo5)";
+    //let code = "oboOBI_0000293 some (oboIAO_0000010 or oboIAO_0000096)";
     //let code = "obo:OBI_0000293 some (obo:IAO_0000010 or obo:IAO_0000096)";
+     //let code = "(obo:OBI_0000293 some (obo:IAO_0000010 or obo:IAO_0000096)) and (obo:OBI_0000299 some obo:IAO_0000010)";
+    //let code = "obo:OBI_0001875 and (obo:OBI_0000643 some (obo:CL_0000000 and (not (obo:BFO_0000051 some obo:OBI_1110132)) and (not (obo:BFO_0000051 some obo:PR_000001004))))";
+
+    //let code = "test DisjointWith Student or Person that hasAge some number";
+    let code = "test DisjointUnionOf {a, b}";
 
     let mut parser = Parser::new();
 
@@ -84,7 +96,9 @@ fn main() {
 
     println!("Tree: {:#?}", tree);
     println!("");
+    println!("");
     println!("S-Expression: {:#?}", tree.root_node().to_sexp());
+    println!("");
     println!("");
 
     let t = translate(&tree.root_node(), code);
