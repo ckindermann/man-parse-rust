@@ -7,10 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tree-sitter = "0.20"
+tree-sitter = "0.20.6"
 tree-sitter-manchester = { path = "../tree-sitter-manchester" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tree-sitter-highlight = "0.20.1"
 
 [build-dependencies]
 cc = "1.0"
