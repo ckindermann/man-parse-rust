@@ -9,6 +9,9 @@ extern crate tree_sitter_manchester; //this is specified in Cargo.toml
 use tree_sitter_manchester::language;
 use tree_sitter_highlight::HighlightEvent;
 
+mod demo_highlight;
+mod highlight;
+
 //tree transducer for manchester syntax parse tree
 //I distinguish between three cases:
 //(i) nodes with a single child
@@ -76,89 +79,8 @@ pub fn translate_operator(n : &Node, raw : &str, operator : &str) -> Value {
     json!(res)
 }
 
-#[derive(Debug)]
-pub struct HighlightSlice {
-    syntax: String,
-    highlight: String, 
-}
-
-pub fn get_highlight_code(h:  Highlight) -> usize { 
-        match h {
-            Highlight(x) => x,
-        }
-}
-
-pub fn highlight(input: &str) -> String  {
-    let mut highlighter = Highlighter::new(); 
-
-    let mut man_config = HighlightConfiguration::new(
-        tree_sitter_manchester::language(),
-        tree_sitter_manchester::HIGHLIGHTS_QUERY,
-        "",
-        "",
-        ).unwrap();
-
-    let highlight_names = &[
-    "blue",
-    "magenta",
-    "turquise",
-    "white",
-    "gray",
-    ];
-
-    man_config.configure(&highlight_names[..]);
-    let highlights = highlighter.highlight(
-        &man_config,
-        input.as_bytes(),
-        None,
-        |_| None
-        ).unwrap();
-
-    let mut res = Vec::new(); 
-    let h = HighlightSlice{syntax:String::from("a"),
-    highlight: String::from("b"), };
-    res.push(h);
-    println!("{:?}", res);
-
-    //TODO: implement a stack to iterate thourhg this
-    let mut stack = Vec::new();
-
-    println!("Highliting start");
-    for event in highlights {
-        match event.unwrap() {
-            HighlightEvent::Source {start, end} => {
-
-                //let hh: usize = end;
-                let hh: &str = &input[start..end];
-                eprintln!("source: {}-{}", start, end);
-                eprintln!("source: {:?}", &input[start..end]); 
-                if ! stack.is_empty() {
-                    println!("ah {:?}", stack[0]);
-                } else {
-                    println!("bh"); 
-                }
-
-    //let extract = &raw[start..end];
-    //json!(extract) 
-            },
-            HighlightEvent::HighlightStart(s) => {
-                eprintln!("highlight style started: {:?}", s);
-                eprintln!("highlight style started: {:?}", highlight_names[get_highlight_code(s)]);
-                stack.push(get_highlight_code(s));
-            },
-            HighlightEvent::HighlightEnd => {
-                eprintln!("highlight style ended");
-                stack.pop();
-            },
-        }
-    }
-    println!("Highliting end");
-
-    String::from("asd")
-}
 
 fn main() {
-    let mut highlighter = Highlighter::new(); 
     //let code = "((b or c) and d) and e"; 
     //let code = "a or bbaba and ddd"; 
     //let code = "not((not a) and b)";
@@ -184,57 +106,6 @@ fn main() {
 
     let language : Language = language();
 
-    let mut man_config = HighlightConfiguration::new(
-        tree_sitter_manchester::language(),
-        tree_sitter_manchester::HIGHLIGHTS_QUERY,
-        "",
-        "",
-        ).unwrap();
-
-    let highlight_names = &[
-    "blue",
-    "magenta",
-    "turquise",
-    "white",
-    "gray",
-    ];
-
-    man_config.configure(&highlight_names[..]);
-
-        //let example_string = b"obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
-        let example_string_2 = "obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
-
-    let highlights = highlighter.highlight(
-        &man_config,
-        //b"obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))",
-        example_string_2.as_bytes(),
-        None,
-        |_| None
-        ).unwrap();
-
-    println!("Highliting start");
-    for event in highlights {
-        match event.unwrap() {
-            HighlightEvent::Source {start, end} => {
-                eprintln!("source: {}-{}", start, end);
-                eprintln!("source: {:?}", &example_string_2[start..end]);
-
-    //let extract = &raw[start..end];
-    //json!(extract) 
-            },
-            HighlightEvent::HighlightStart(s) => {
-                eprintln!("highlight style started: {:?}", s);
-                eprintln!("highlight style started: {:?}", highlight_names[get_highlight_code(s)]);
-            },
-            HighlightEvent::HighlightEnd => {
-                eprintln!("highlight style ended");
-            },
-        }
-    }
-    println!("Highliting end");
-
-
-
     parser.set_language(language).expect("Error loading manchester grammar");
     let tree = parser.parse(code, None).unwrap();
 
@@ -251,7 +122,11 @@ fn main() {
     println!("Serialisation: {:?}", serde_json::to_string(&t).unwrap());
     println!("Serialisation: {}", serde_json::to_string(&t).unwrap());
 
-    highlight("obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))");
+    let man_highlight = highlight::highlight("obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))");
+    println!("Highlighted: {:#?}", man_highlight);
+    //println!("Highlighted: {:?}", man_highlight); 
+
+    //demo_highlight::highlight("obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))");
 
 
     //let mut rc = tree.root_node().child(0).unwrap().walk();
