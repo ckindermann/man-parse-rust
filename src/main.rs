@@ -5,6 +5,7 @@ extern crate tree_sitter_manchester; //this is specified in Cargo.toml
 mod demo_highlight;
 mod highlight;
 mod transducer; 
+mod syntax_checker;
 
 fn main() {
     //let manchester_string = "g SubClassOf: (aa some (b or c)) and (p some d)";
@@ -15,8 +16,9 @@ fn main() {
     //let manchester_string = "obo:OBI_0001875 and (obo:OBI_0000643 some (obo:CL_0000000 and (not (obo:BFO_0000051 some obo:OBI_1110132)) and (not (obo:BFO_0000051 some obo:PR_000001004))))"; 
     //let manchester_string = "obo:OBI_0000070 DisjointWith: obo:OBI_0000339, obo:OBI_0200000, obo:OBI_0600013";
     //let manchester_string = "obo:IAO_0000078 EquivalentTo: obo:IAO_0000002 , obo:IAO_0000120 , obo:IAO_0000121 , obo:IAO_0000122 , obo:IAO_0000123 , obo:IAO_0000124 , obo:IAO_0000125 , obo:IAO_0000423 , obo:IAO_0000428";
-    let manchester_string = "obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
-    //let manchester_string = "obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (<obo:BFO_0000040> or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
+    //let manchester_string = "obo:OBI_0000070 SubClassOf: obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (obo:BFO_0000040 or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
+    //let manchester_string = "obo:OBI_0000070 SubClassOf: <obo:OBI_0000299 some (obo:IAO_0000027 and (obo:IAO_0000136 only (<obo:BFO_0000040> or (not (obo:RO_0000087 some obo:OBI_0000067)))))";
+    let manchester_string = "obo:OBI_0000070 SubClassOf: <obo:OBI_0000299";
 
     let mut parser = Parser::new();
 
@@ -31,8 +33,10 @@ fn main() {
     println!("");
     println!("S-Expression: {:#?}", tree.root_node().to_sexp());
     println!("");
-    println!("Has Errors: {:#?}", tree.root_node().has_error());
+    println!("Has Errors: {:#?}", syntax_checker::has_errors(&tree));
     println!("");
+    println!("Error Vec: {:#?}", syntax_checker::get_errors(&tree));
+
 
     let t = transducer::translate(&tree.root_node(), manchester_string);
     println!("Translation to Serde Value: {:#?}", t);
