@@ -25,7 +25,7 @@ pub fn highlight(input: &str) {
     let highlight_names = &[
     "magenta",
     "blue",
-    "turquise",
+    "turquois",
     "white",
     "gray",
     ];

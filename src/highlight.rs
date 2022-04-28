@@ -31,7 +31,7 @@ pub fn highlight(input: &str) -> Vec<HighlightSlice>  {
     let highlight_names = &[
     "blue",
     "magenta",
-    "turquise",
+    "turquois",
     "white",
     "gray",
     ];
