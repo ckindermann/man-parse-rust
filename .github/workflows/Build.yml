@@ -20,10 +20,13 @@ jobs:
         CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
     steps:
       - uses: actions/checkout@v3
-      - name: Cache cargo build
-        uses: Swatinem/rust-cache@v1
-        with:
-          key: ${{ matrix.platform.target }}
+
+     # - name: Cache cargo build
+     #   uses: Swatinem/rust-cache@v1
+     #   with:
+     #     key: ${{ matrix.platform.target }}
+      - name: Build
+        run: cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
