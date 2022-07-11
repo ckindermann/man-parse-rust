@@ -27,7 +27,14 @@ jobs:
             repository: ckindermann/tree-sitter-manchester
             path: tree-sitter-manchester
 
-        #TODO: need to add tree sitter
+      - name: Install tree-sitter
+        run: |
+            cargo install tree-sitter-cli
+
+      - name: Build parser
+        working-directory: tree-sitter-manchester
+        run: |
+            tree-sitter generate
 
      # - name: Cache cargo build
      #   uses: Swatinem/rust-cache@v1
