@@ -21,6 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Checkout tree-sitter-manchester 
+        uses: actions/checkout@v3
+        with:
+            repository: ckindermann/tree-sitter-manchester
+            path: tree-sitter-manchester
+
+        #TODO: need to add tree sitter
+
      # - name: Cache cargo build
      #   uses: Swatinem/rust-cache@v1
      #   with:
