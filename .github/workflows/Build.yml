@@ -14,10 +14,10 @@ jobs:
           { target: "armv7-unknown-linux-musleabihf", image_tag: "armv7-musleabihf" },
           { target: "armv7-unknown-linux-musleabi", image_tag: "armv7-musleabi" },
         ]
-   #container:
-   #  image: docker://messense/rust-musl-cross:${{ matrix.platform.image_tag }}
-   #  env:
-   #    CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
+    container:
+      image: docker://messense/rust-musl-cross:${{ matrix.platform.image_tag }}
+      env:
+        CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -27,12 +27,7 @@ jobs:
         uses: actions/checkout@v3
         with:
             repository: ckindermann/tree-sitter-manchester
-            path: tree-sitter-manchester
-
-      - name: Inspect
-        run: |
-            pwd
-            ls -lah
+            path: tree-sitter-manchester 
 
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
@@ -44,7 +39,7 @@ jobs:
 
       - name: Install tree-sitter
         run: |
-            rustup target add ${{ matrix.platform.target }}
+            #rustup target add ${{ matrix.platform.target }}
             cargo install tree-sitter-cli
 
       - name: Build parser
@@ -56,14 +51,15 @@ jobs:
      #   uses: Swatinem/rust-cache@v1
      #   with:
      #     key: ${{ matrix.platform.target }}
+     #
       - name: Build
         working-directory: man-parse-rust
-        run: cargo build --release --target ${{ matrix.platform.target }}
+        run: cargo build --release #--target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.platform.target }}-bin
-          path: target/${{ matrix.platform.target }}/release/man-parse-rust
-          #path: man-parse-rust/target/release/man-parse-rust
+          #path: target/${{ matrix.platform.target }}/release/man-parse-rust
+          path: man-parse-rust/target/release/man-parse-rust
           if-no-files-found: error
