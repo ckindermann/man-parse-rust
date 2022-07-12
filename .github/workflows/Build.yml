@@ -39,7 +39,7 @@ jobs:
 
       - name: Install tree-sitter
         run: |
-            #rustup target add ${{ matrix.platform.target }}
+            rustup target add ${{ matrix.platform.target }}
             cargo install tree-sitter-cli
 
       - name: Build parser
@@ -54,12 +54,12 @@ jobs:
      #
       - name: Build
         working-directory: man-parse-rust
-        run: cargo build --release #--target ${{ matrix.platform.target }}
+        run: cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.platform.target }}-bin
-          #path: target/${{ matrix.platform.target }}/release/man-parse-rust
-          path: man-parse-rust/target/release/man-parse-rust
+          path: target/${{ matrix.platform.target }}/release/man-parse-rust
+          #path: man-parse-rust/target/release/man-parse-rust
           if-no-files-found: error
