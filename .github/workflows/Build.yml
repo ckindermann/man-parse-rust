@@ -14,10 +14,10 @@ jobs:
           { target: "armv7-unknown-linux-musleabihf", image_tag: "armv7-musleabihf" },
           { target: "armv7-unknown-linux-musleabi", image_tag: "armv7-musleabi" },
         ]
-    container:
-      image: docker://messense/rust-musl-cross:${{ matrix.platform.image_tag }}
-      env:
-        CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
+   #container:
+   #  image: docker://messense/rust-musl-cross:${{ matrix.platform.image_tag }}
+   #  env:
+   #    CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
     steps:
       - uses: actions/checkout@v3
 
