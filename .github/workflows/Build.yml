@@ -27,6 +27,13 @@ jobs:
             repository: ckindermann/tree-sitter-manchester
             path: tree-sitter-manchester
 
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy 
+
       - name: Install tree-sitter
         run: |
             cargo install tree-sitter-cli
@@ -35,6 +42,9 @@ jobs:
         working-directory: tree-sitter-manchester
         run: |
             tree-sitter generate
+
+
+            #this currently fails
 
      # - name: Cache cargo build
      #   uses: Swatinem/rust-cache@v1
