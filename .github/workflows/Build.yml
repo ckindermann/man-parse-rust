@@ -34,6 +34,8 @@ jobs:
             override: true
             components: rustfmt, clippy 
 
+
+
       - name: Install tree-sitter
         run: |
             cargo install tree-sitter-cli
@@ -51,7 +53,9 @@ jobs:
      #   with:
      #     key: ${{ matrix.platform.target }}
       - name: Build
-        run: cargo build --release --target ${{ matrix.platform.target }}
+        run: |
+            rustup target add ${{ matrix.platform.target }}
+            cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
