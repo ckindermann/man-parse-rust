@@ -29,6 +29,9 @@ jobs:
             repository: ckindermann/tree-sitter-manchester
             path: tree-sitter-manchester 
 
+      - name: Install musl
+        run: sudo apt-get update && sudo apt-get install musl-tools
+
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
