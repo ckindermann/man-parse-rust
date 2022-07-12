@@ -20,12 +20,14 @@ jobs:
    #    CFLAGS_armv7_unknown_linux_musleabihf: '-mfpu=vfpv3-d16'
     steps:
       - uses: actions/checkout@v3
+        with:
+            path: man-parse-rust
 
       - name: Checkout tree-sitter-manchester 
         uses: actions/checkout@v3
         with:
             repository: ckindermann/tree-sitter-manchester
-            path: ../tree-sitter-manchester
+            path: tree-sitter-manchester
 
       - name: Inspect
         run: |
@@ -46,7 +48,7 @@ jobs:
             cargo install tree-sitter-cli
 
       - name: Build parser
-        working-directory: ../tree-sitter-manchester
+        working-directory: tree-sitter-manchester
         run: |
             tree-sitter generate
 
@@ -58,6 +60,7 @@ jobs:
      #   with:
      #     key: ${{ matrix.platform.target }}
       - name: Build
+        working-directory: man-parse-rust
         run: cargo build --release #--target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
@@ -65,5 +68,5 @@ jobs:
         with:
           name: ${{ matrix.platform.target }}-bin
           #path: target/${{ matrix.platform.target }}/release/man-parse-rust
-          path: target/release/man-parse-rust
+          path: man-parse-rust/target/release/man-parse-rust
           if-no-files-found: error
