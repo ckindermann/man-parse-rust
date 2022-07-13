@@ -40,6 +40,11 @@ jobs:
             components: rustfmt, clippy 
             target: ${{ matrix.platform.target }}
 
+      - name: Install cross
+        run: |
+            sudo cargo install cross --git https://github.com/cross-rs/cross
+            sudo systemctl start docker
+
 
       - name: Install tree-sitter
         run: |
@@ -58,7 +63,8 @@ jobs:
      #
       - name: Build
         working-directory: man-parse-rust
-        run: cargo build --release --target ${{ matrix.platform.target }}
+        run: cross build --target ${{ matrix.platform.target }}
+        #run: cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
