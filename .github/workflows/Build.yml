@@ -63,13 +63,13 @@ jobs:
      #
       - name: Build
         working-directory: man-parse-rust
-        run: cross build --target ${{ matrix.platform.target }}
+        run: cross build --release --target ${{ matrix.platform.target }}
         #run: cargo build --release --target ${{ matrix.platform.target }}
 
       - name: Upload binary artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.platform.target }}-bin
-          path: target/${{ matrix.platform.target }}/release/man-parse-rust
+          path: man-parse-rust/target/${{ matrix.platform.target }}/release/man-parse-rust
           #path: man-parse-rust/target/release/man-parse-rust
           if-no-files-found: error
